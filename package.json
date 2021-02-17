@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "./node_modules/.bin/babel src --out-dir lib; browserify ./lib/main.js -o ./dist/bundle.js"
+    "build": "./node_modules/.bin/babel src --out-dir lib; browserify ./lib/main.js -o ./dist/bundle.js ; rm ./lib/* ; rmdir ./lib"
   },
   "author": "",
   "license": "ISC",

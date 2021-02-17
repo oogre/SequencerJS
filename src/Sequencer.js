@@ -2,7 +2,7 @@
   21.2.camera - Sequencer.js
   @author Evrard Vincent (vincent@ogre.be)
   @Date:   2021-02-14 17:04:54
-  @Last Modified time: 2021-02-17 14:31:04
+  @Last Modified time: 2021-02-17 23:44:04
 \*----------------------------------------*/
 
 /*
@@ -24,7 +24,7 @@
 
 import AudioPlayer from "./AudioPlayer.js";
 import EventHelper from "./EventHelper.js";
-import {divAndMod, isFunction} from "./Tools.js";
+import {divAndMod, isFunction, isNumber} from "./Tools.js";
 
 export default class Sequencer{
 	constructor(audioPath, BPM, debug=true){
@@ -39,8 +39,7 @@ export default class Sequencer{
 			this.eventHelper.trigger(`step.${this.currentStep}`, {step : this.currentStep});
 			this._tic ++;
 		}, this.interval);
-
-		this.eventDict = {};
+		this.records = {};
 
 		this.playBtn = document.createElement("button");
 		this.playBtn.innerText = "play";
@@ -66,20 +65,43 @@ export default class Sequencer{
 			document.body.append(this.debugDiv);
 		}
 	}
-	registerSequence({name, start=1, onStart, stop = 10, onStop, measure=1, steps = [1], onStep = ()=>{}}={}){
+	registerSequence({name, start=1, onStart, stop = 10, onStop, measure=1, steps = [1], onStep}={}){
 		start = start-1;
-		let recorded = [];
+		this.records[name] = this.records[name] || [];
+		
+		let _len = 1 / (stop - start - 1);
 
+		let _onStart = (event)=>{
+			onStart({
+				...event,
+				eventName : "start",
+				sequenceName : name
+			});
+		}
+		
 		let _onStep = (event)=>{
 			onStep({
-				amount : (event.step - start) / (stop - start - 1),
-				...event
+				...event,
+				sequenceName : name,
+				amount : (event.step - start) * _len
 			});
 		}
 
-		if(Number.isInteger(start) && start>= 0 && isFunction(onStart)){
-			this.eventHelper.on(`step.${start}`, onStart);	
-			recorded.push([`step.${start}`, onStart]);
+		let _onStop = (event)=>{
+			onStop({
+				...event,
+				eventName : "stop",
+				sequenceName : name
+			});
+		}
+
+		let selfUnregister = () => {
+			this.unregisterSequence(name);
+		}
+
+		if(isNumber(start) && start>= 0 && isFunction(onStart)){
+			this.eventHelper.on(`step.${start}`, _onStart);	
+			this.records[name].push([`step.${start}`, _onStart]);
 		}
 
 		let n = 0;
@@ -90,18 +112,21 @@ export default class Sequencer{
 				let step = start + n + a;
 				if(steps.includes(r_step)){
   					this.eventHelper.on(`step.${step}`, _onStep);	
-					recorded.push([`step.${step}`, _onStep]);
+					this.records[name].push([`step.${step}`, _onStep]);
 				}
 			}	
 			n++;
 		}
 
-		if(Number.isInteger(stop) && stop >= 0 && isFunction(onStop)){
-			this.eventHelper.on(`step.${stop}`, onStop);	
-			recorded.push([`step.${stop}`, onStop]);
+		if(isNumber(stop) && stop >= 0){
+			if(isFunction(onStop)){
+				this.eventHelper.on(`step.${stop}`, _onStop);	
+				this.records[name].push([`step.${stop}`, _onStop]);
+			}
+			this.eventHelper.on(`step.${stop}`, selfUnregister);	
+			this.records[name].push([`step.${stop}`, selfUnregister]);
 		}
-		
-		return recorded;
+		return this;
 	}
 	update(){
 		this.eventHelper.consume();
@@ -113,8 +138,8 @@ export default class Sequencer{
 
 
 
-	unregisterSequence(records){
-		(records||[]).map(([eventName, action])=>{
+	unregisterSequence(name){
+		(this.records[name]||[]).map(([eventName, action])=>{
 			this.eventHelper.off(eventName, action);
 		});
 	}
@@ -157,22 +182,5 @@ export default class Sequencer{
 	pause(){
 		this.player.pause();
 		this.sloop.stop();
-		this.unregisterSequence(this._loopEventRecords);
-	}
-	loop(fromStep, toStep){
-		this.pause();
-		fromStep = fromStep - 1;
-		this.jump(fromStep);
-		this._loopEventRecords = this.registerSequence({
-			name : "loop",
-			stop : toStep,
-			onStop : () => this.jump(fromStep)
-		});
-		this.play();
-	}
-	jump(step){
-		//console.log(step, this.BPM, 0.01666666666667);
-		this.player.currentTime = step * this.__bps ;	//convert step to seconds
-		this._tic = step * this._StepPerBeat - 1; 		//convert step to tic
 	}
 }
