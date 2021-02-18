@@ -188,54 +188,6 @@ class Sequencer {
     }
   }
 
-  registerSequence2(_ref) {
-    let {
-      name,
-      start = 1,
-      onStart,
-      stop = 1000,
-      onStop,
-      onSteps
-    } = _ref;
-    if (!Array.isArray(onSteps)) onSteps = [onSteps];
-    if (typeof name != "string" || !name) throw new Error("name must be non-empty string, received \"".concat(name, "\" which is ").concat(typeof name));
-    if (!(0, _Tools.isNumber)(start) || start < 1 || !(0, _Tools.isNumber)(stop) || stop < 1) throw new Error("start and stop must be numbers >= 1");
-    start = start - 1;
-
-    let _len = 1 / (stop - start - 1);
-
-    this.records[name] = this.records[name] || [];
-
-    let _onStart = (0, _Tools.isFunction)(onStart) ? event => {
-      onStart(_objectSpread(_objectSpread({}, event), {}, {
-        eventName: "start",
-        sequenceName: name
-      }));
-    } : null;
-
-    let _onStop = (0, _Tools.isFunction)(onStop) ? event => {
-      onStart(_objectSpread(_objectSpread({}, event), {}, {
-        eventName: "stop",
-        sequenceName: name
-      }));
-    } : null;
-
-    let measure = onSteps.length;
-    let actions = {};
-    onSteps.map((step, key) => {
-      if ((0, _Tools.isFunction)(step)) {
-        actions[key] = step;
-      }
-
-      if (Array.isArray(step)) {
-        step.map((_step, _key) => {
-          actions["".concat(key, "+").concat(_key, "/").concat(step.length)] = _step;
-        });
-      }
-    });
-    return actions;
-  }
-
   registerSequence() {
     let {
       name,
@@ -322,8 +274,8 @@ class Sequencer {
   }
 
   unregisterSequence(name) {
-    (this.records[name] || []).map((_ref2) => {
-      let [eventName, action] = _ref2;
+    (this.records[name] || []).map((_ref) => {
+      let [eventName, action] = _ref;
       this.eventHelper.off(eventName, action);
     });
   }
