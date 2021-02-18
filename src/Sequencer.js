@@ -2,7 +2,7 @@
   21.2.camera - Sequencer.js
   @author Evrard Vincent (vincent@ogre.be)
   @Date:   2021-02-14 17:04:54
-  @Last Modified time: 2021-02-17 23:44:04
+  @Last Modified time: 2021-02-17 23:53:49
 \*----------------------------------------*/
 
 /*
@@ -65,7 +65,7 @@ export default class Sequencer{
 			document.body.append(this.debugDiv);
 		}
 	}
-	registerSequence({name, start=1, onStart, stop = 10, onStop, measure=1, steps = [1], onStep}={}){
+	registerSequence({name, start=1, onStart, stop = 10, onStop, measure=1, steps=[1], onStep}={}){
 		start = start-1;
 		this.records[name] = this.records[name] || [];
 		

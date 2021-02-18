@@ -2,7 +2,7 @@
   beakerProject - sketch.js
   @author Evrard Vincent (vincent@ogre.be)
   @Date:   2021-02-04 22:38:59
-  @Last Modified time: 2021-02-17 23:51:48
+  @Last Modified time: 2021-02-18 08:11:27
 \*----------------------------------------*/
 
 p5.Vector.x = new p5.Vector(1, 0, 0);
@@ -16,7 +16,7 @@ p5.Vector.random = ()=> {
 	if(t == 2)return p5.Vector.y.copy();
 }
 
-let audioPath = "./../assets/audio/West Rules/Pulso & Romain Richard/End Of Utopia EP/05.Eternal Life.mp3";
+let audioPath = "../../assets/audio/West Rules/Pulso & Romain Richard/End Of Utopia EP/05.Eternal Life.mp3";
 let sequencer;
 
 let pm;
