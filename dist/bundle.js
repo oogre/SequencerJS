@@ -212,10 +212,12 @@ class Sequencer {
     };
 
     let _onStep = event => {
-      onStep(_objectSpread(_objectSpread({}, event), {}, {
-        sequenceName: name,
-        amount: (event.step - start) * _len
-      }));
+      if ((0, _Tools.isFunction)(onStep)) {
+        onStep(_objectSpread(_objectSpread({}, event), {}, {
+          sequenceName: name,
+          amount: (event.step - start) * _len
+        }));
+      }
     };
 
     let _onStop = event => {

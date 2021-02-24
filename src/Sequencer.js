@@ -2,7 +2,7 @@
   21.2.camera - Sequencer.js
   @author Evrard Vincent (vincent@ogre.be)
   @Date:   2021-02-14 17:04:54
-  @Last Modified time: 2021-02-17 23:53:49
+  @Last Modified time: 2021-02-20 13:16:01
 \*----------------------------------------*/
 
 /*
@@ -80,11 +80,13 @@ export default class Sequencer{
 		}
 		
 		let _onStep = (event)=>{
-			onStep({
-				...event,
-				sequenceName : name,
-				amount : (event.step - start) * _len
-			});
+			if(isFunction(onStep)){
+				onStep({
+					...event,
+					sequenceName : name,
+					amount : (event.step - start) * _len
+				});
+			}
 		}
 
 		let _onStop = (event)=>{
